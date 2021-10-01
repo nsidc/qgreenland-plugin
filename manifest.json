@@ -1,0 +1,113 @@
+{
+    "version": "v0.1.0",
+    "qgr_version": "v2.0.0",
+    "layers": [
+        {
+            "id": "nunagis_bird_protected_areas",
+            "title": "Bird protected areas",
+            "description": "Polygons representing protected areas for birds.",
+            "hierarchy": [
+                "Biology",
+                "Birds"
+            ],
+            "tags": [
+                "Birds",
+                "Nests",
+                "Protected areas",
+                "Restricted areas"
+            ],
+            "assets": [
+                {
+                    "file": "nunagis_bird_protected_areas.gpkg",
+                    "type": "data",
+                    "checksum": "d568078f6ef14df085c2d84e2eff573e",
+                    "size_bytes": 184320
+                },
+                {
+                    "file": "nunagis_bird_protected_areas.qml",
+                    "type": "style",
+                    "checksum": "b7c14ec6110fa820ca6b65f5aec85911",
+                    "size_bytes": 1521
+                },
+                {
+                    "file": "nunagis_bird_protected_areas.xml",
+                    "type": "ancillary",
+                    "checksum": "e491b6919b9a77a9fe98a8e574214abf",
+                    "size_bytes": 2091
+                }
+            ],
+            "layer_details": "Polygons representing areas protected for birds.\n\n<h2>Original Data Source</h2>\nNunaGIS data server protected area data\n\nThe NunaGIS data server provides a range of datasets on animal areas of\nimportance and protected areas. These data are used to populate the following\nQGreenland data layers: Walrus Protected Areas, Goose Protected Areas, Caribou\nCalving Areas, Beluga Areas, Bird Protected Areas, Thickbilled Murre Breeding\nColony 5km Zones, Seabird Breeding Colonies, Eider Protected Areas, Murre Group\n1 km Zones, Musk Oxen Calving Areas, Narwhal Areas, and Polar Bear Breeding\nAreas.\n\n<h2>Citation</h2>\n<a href=\"https://kort.nunagis.gl/server/rest/services/Hosted\">NunaGIS (2020).\nDate accessed: 2021-01-26.</a>\n\n<h2>Provenance</h2>\n<ul>\n<li><pre>gdalwarp ... v3.1.2</pre></li>\n<li><pre>gdaltranslate ... v3.1.2</pre></li>\n<li>...</li>\n</ul>\n"
+        },
+        {
+            "id": "nunagis_polar_bears",
+            "title": "Polar Bears",
+            "description": "Points representing polar bears.",
+            "hierarchy": [
+                "Biology",
+                "Mammals"
+            ],
+            "tags": [
+                "Mammals",
+                "Dangerous",
+                "Protected areas"
+            ],
+            "assets": [
+                {
+                    "file": "nunagis_bears.gpkg",
+                    "type": "data",
+                    "checksum": "ff68078f6ef14df085c2d84e2eff573e",
+                    "size_bytes": 184320
+                },
+                {
+                    "file": "nunagis_bears.qml",
+                    "type": "style",
+                    "checksum": "ksc14ec6110fa820ca6b65f5aec85911",
+                    "size_bytes": 1521
+                },
+                {
+                    "file": "nunagis_bears.xml",
+                    "type": "ancillary",
+                    "checksum": "po91b6919b9a77a9fe98a8e574214abf",
+                    "size_bytes": 2091
+                }
+            ],
+            "layer_details": "Points representing polar bears.\n\n<h2>Original Data Source</h2>\nNunaGIS data server protected area data\n\nThe NunaGIS data server provides a range of datasets on animal areas of\nimportance and protected areas. These data are used to populate the following\nQGreenland data layers: Walrus Protected Areas, Goose Protected Areas, Caribou\nCalving Areas, Beluga Areas, Bird Protected Areas, Thickbilled Murre Breeding\nColony 5km Zones, Seabird Breeding Colonies, Eider Protected Areas, Murre Group\n1 km Zones, Musk Oxen Calving Areas, Narwhal Areas, and Polar Bear Breeding\nAreas.\n\n<h2>Citation</h2>\n<a href=\"https://kort.nunagis.gl/server/rest/services/Hosted\">NunaGIS (2020).\nDate accessed: 2021-01-26.</a>\n\n<h2>Provenance</h2>\n<ul>\n<li><pre>gdalwarp ... v3.1.2</pre></li>\n<li><pre>gdaltranslate ... v3.1.2</pre></li>\n<li>...</li>\n</ul>\n"
+        },
+        {
+            "id": "nunagis_bird_dtm",
+            "title": "Digital terrain model",
+            "description": "Digital Terrain Model of Greenland.",
+            "hierarchy": [
+                "Geomorphology",
+                "Elevation"
+            ],
+            "tags": [
+                "Elevation",
+                "Geology",
+                "DEM",
+                "DTM"
+            ],
+            "assets": [
+                {
+                    "file": "dtm.geotiff",
+                    "type": "data",
+                    "checksum": "ty6ko48f6ef14df085c2d84e2eff573e",
+                    "size_bytes": 2004320
+                },
+                {
+                    "file": "dtm.qml",
+                    "type": "style",
+                    "checksum": "opi89ec6110fa820ca6b65f5aec85911",
+                    "size_bytes": 1432
+                },
+                {
+                    "file": "dtm.xml",
+                    "type": "ancillary",
+                    "checksum": "e871b6919b9a77a9fe98a8e574214abf",
+                    "size_bytes": 4391
+                }
+            ],
+            "layer_details": "Digital Terrai Model of the entire Greenland.\n\n<h2>Original Data Source</h2>\nNunaGIS data server protected area data\n\nThe NunaGIS data server provides a range of datasets on animal areas of\nimportance and protected areas. These data are used to populate the following\nQGreenland data layers: Walrus Protected Areas, Goose Protected Areas, Caribou\nCalving Areas, Beluga Areas, Bird Protected Areas, Thickbilled Murre Breeding\nColony 5km Zones, Seabird Breeding Colonies, Eider Protected Areas, Murre Group\n1 km Zones, Musk Oxen Calving Areas, Narwhal Areas, and Polar Bear Breeding\nAreas.\n\n<h2>Citation</h2>\n<a href=\"https://kort.nunagis.gl/server/rest/services/Hosted\">NunaGIS (2020).\nDate accessed: 2021-01-26.</a>\n\n<h2>Provenance</h2>\n<ul>\n<li><pre>gdalwarp ... v3.1.2</pre></li>\n<li><pre>gdaltranslate ... v3.1.2</pre></li>\n<li>...</li>\n</ul>\n"
+        }
+    ]
+}

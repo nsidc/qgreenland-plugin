@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/qgreenland" >
+        <file>qgreenland-icon.png</file>
+    </qresource>
+</RCC>
