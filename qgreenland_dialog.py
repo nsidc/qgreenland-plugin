@@ -458,17 +458,51 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         items = self.get_checked_items()
         if items:
             self.write_json(items)
-        
+
+        # get the dictionary of all the layer to be downloaded with key=folder and value=layer name
+        layer_to_download = {}
         for layer in self.data['layers']:
-            
-            for ii in items:
-
-                if layer['id'] == ii:
-
-                    print(layer['id'], layer['assets'][0]['file'])
-                    print('http://localhost:8080' + '/' + layer['id'] + '/' + layer['assets'][0]['file'])
+            for current, parent in enumerate(items):
+                if layer['id'] == parent:
+                    layer_to_download[parent] = layer['assets'][0]['file']
         
+        # just get the length of the list divided by 100
+        total = 100 / len(layer_to_download)
 
+        # clear the download label text
+        self.download_label.setText("")
+
+        # TODO: put here the method to download the data (now in commented text)
+        # loop on the dictionary of layers and move the progress bar
+        for current, (parent, item) in enumerate(layer_to_download.items()):
+
+            self.download_label.setText(f"Downloading {item} {current + 1} of {len(layer_to_download)}")
+            self.progressBar.setValue(int((current + 1) * total))
+
+            # if we have data (default links have been chosen) then get the url from teh data
+            # if a custom url has been entered get the text else get the text
+            # if self.server_list_combo.currentData():
+            #     downloading_url = self.server_list_combo.currentData()
+            # else:
+            #     downloading_url = self.server_list_combo.currentText()
+
+            # downloading_url = downloading_url + '/' + parent + '/' + item
+
+            # create a network request and the corresponding reply object
+            # url = QUrl(downloading_url)
+            # network_request = QNetworkRequest(url)
+            # reply = QgsNetworkAccessManager.instance().blockingGet(network_request)
+            # reply_content = reply.content()
+
+            # create the path to where to save the file
+            # saving_path = os.path.join(self.saving_folder, item)
+
+            # # write the reply to a file
+            # with open(saving_path, 'wb') as f:
+            #     f.write(reply_content)
+
+
+        
     def browse_folder(self):
         """
         open a QDialog to choose the folder where to save the data
