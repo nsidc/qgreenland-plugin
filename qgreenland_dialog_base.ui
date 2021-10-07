@@ -124,7 +124,7 @@
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
-         <widget class="QTreeWidget" name="treeWidget">
+         <widget class="QTreeView" name="treeView">
           <property name="autoFillBackground">
            <bool>true</bool>
           </property>
@@ -137,11 +137,6 @@
           <property name="headerHidden">
            <bool>true</bool>
           </property>
-          <column>
-           <property name="text">
-            <string/>
-           </property>
-          </column>
          </widget>
          <widget class="QTextBrowser" name="summary_text">
           <property name="openExternalLinks">

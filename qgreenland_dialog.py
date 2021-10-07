@@ -28,13 +28,12 @@ import requests
 
 from qgis.PyQt import uic, QtWidgets
 from qgis.PyQt.QtWidgets import (
-    QTreeWidgetItem,
-    QTreeWidget,
     QFileDialog,
     QSizePolicy,
     QGridLayout
 )
-from qgis.PyQt.QtGui import QIcon, QStandardItemModel
+from qgis.PyQt.QtCore import QSortFilterProxyModel
+from qgis.PyQt.QtGui import QIcon, QStandardItemModel, QStandardItem
 from qgis.PyQt.Qt import Qt
 
 from qgis.core import (
@@ -57,12 +56,25 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         super(QGreenlandDialog, self).__init__(parent)
         self.setupUi(self)
 
+        # create a QStandardItemModule
+        self.list_model = QStandardItemModel(self)
+
+        # create a QSortFilterProxyModel used to search strings in the Widget
+        self.filter_model = QSortFilterProxyModel(self)
+        # set the itemModel to the QSortFilterProxyModel
+        self.filter_model.setSourceModel(self.list_model)
+
+        # set the QStandardItemModel to the treeView
+        self.treeView.setModel(self.filter_model)
+
+        # variable to ignore the changes made in the model (cheked or unchecked items)
+        self.ignore_model_changes = False
+
         # create instance of QgsMessageBar and add the widget to the layout
         self.bar = QgsMessageBar()
         self.layout().addWidget(self.bar, 0, 0, -1, 3, Qt.AlignTop)
         # call whenever needed with
         # self.bar.pushMessage(self.tr("Message"), "", level=Qgis.Info, duration=3)
-
 
         # connect the Next and Prev buttons to the methods that change the page
         self.next_button.clicked.connect(self._next)
@@ -73,10 +85,9 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         self.server_list_combo.addItem(self.tr('PGC: https://example.com/qgreenland'), 'https://example.com/qgreenland')
 
         # pressing (not only selecting or checking) on an item fills the information
-        self.treeWidget.itemPressed.connect(self.display_information)
+        self.treeView.selectionModel().currentChanged.connect(self.display_information)
 
-        # TODO: shoukld check and uncheck all the items depending on the parent
-        self.treeWidget.itemClicked.connect(self.check_uncheck)
+        self.list_model.itemChanged.connect(self.on_item_changed)
 
         # when the text changes connect to the filter function
         self.search_box.textChanged.connect(self.set_filter_string)
@@ -84,14 +95,16 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         # connect to the methods that creates the QGreenland folder if not exists
         self._user_profile_folder()
         
-        # fill the treeWidget with the json information
+        # fill the treeView with the json information
         self._fill_tree()
 
         # connect the Download button with the download_data method
         self.download_button.clicked.connect(self.download_data)
 
+        # connect the Browse button to the choose folder method
         self.browse_button.clicked.connect(self.browse_folder)
 
+        # se the download button to not enabled (it will only if a folder has been chosen)
         self.download_button.setEnabled(False)
 
 
@@ -121,9 +134,6 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         # go to the next page
         self.stackedWidget.setCurrentIndex(i+1)
 
-        # call the method to fill the treeWidget with all the data
-        self._fill_tree()
-
     def _prev(self):
         """
         go to the previous page of the stacked widget
@@ -148,14 +158,14 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def _fill_tree(self):
         """
-        Fill hte treeWidget with the json file creating QTreeWidgetItem items
+        Fill hte treeView with the json file creating QTreeViewItem items
         and parents
 
         Sets the items as checkable and unchecked by default
         """
 
-        # clear the treeWidget
-        self.treeWidget.clear()
+        # clear the treeView
+        self.list_model.clear()
 
         # call the read_json function that reads the eventual existing json
         # file with the downloaded information of the files
@@ -184,12 +194,13 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         # use set to avoid duplicates
         hierarchy = list(set(hierarchy))
 
-        # loop into the hierarchies and fill the QTreeWidget with them
+        # loop into the hierarchies and fill the QTreeView with them
         for h in hierarchy:
 
-            item = QTreeWidgetItem([h])
-            item.setCheckState(0, Qt.Unchecked) # first columun, checkable, checked=0
-            self.treeWidget.addTopLevelItem(item)
+            item = QStandardItem(h)
+            item.setFlags(Qt.ItemIsEnabled|Qt.ItemIsSelectable|Qt.ItemIsUserCheckable)
+            item.setCheckState( Qt.Unchecked) # first columun, checkable, checked=0
+            self.list_model.appendRow([item])
 
             # loop in all the layers of the json
             for layer in self.data['layers']:
@@ -198,12 +209,13 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
                 if h in layer['hierarchy']:
                     
                     # create the child (checkable)
-                    child = QTreeWidgetItem([layer['title']])
+                    child = QStandardItem(layer['title'])
                     # set the custom data for the item as the unique id of each layer
-                    child.setData(0, Qt.UserRole, layer['id'])
+                    child.setData(layer['id'], Qt.UserRole)
+                    child.setFlags(Qt.ItemIsEnabled|Qt.ItemIsSelectable|Qt.ItemIsUserCheckable)
                     # to add an icon to the single item
                     # child.setIcon(0, QIcon(os.path.join(os.path.dirname(__file__), 'qgreenland-icon.png')))
-                    child.setCheckState(0, Qt.Unchecked)
+                    child.setCheckState(Qt.Unchecked)
 
                     # add the icons depending on the checksum
                     # only if the json file in the profile folder exists
@@ -216,29 +228,29 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
                                     if i['type'] == 'data':
                                         # if the checksum is the same - we have the most recent layer downloaded
                                         if layer['assets'][0]['checksum'] == i['checksum']:
-                                            child.setIcon(0, QIcon(os.path.join(os.path.dirname(__file__), 'icons','uptodate.png')))
-                                            child.setToolTip(0, self.tr("You already have the most recent data downloaded"))
+                                            child.setIcon(QIcon(os.path.join(os.path.dirname(__file__), 'icons','uptodate.png')))
+                                            child.setToolTip(self.tr("You already have the most recent data downloaded"))
                                         # if the checksum is not the same - warn the user with the specified icon
                                         elif layer['assets'][0]['checksum'] != i['checksum']:
-                                            child.setIcon(0, QIcon(os.path.join(os.path.dirname(__file__), 'icons','outdate.png')))
-                                            child.setToolTip(0, self.tr("A more recent version of the file is available"))
+                                            child.setIcon(QIcon(os.path.join(os.path.dirname(__file__), 'icons','outdate.png')))
+                                            child.setToolTip(self.tr("A more recent version of the file is available"))
                     except:
                         pass
         
                     # add the child to the parent item
-                    item.addChild(child)
+                    item.appendRow([child])
 
         # sort the tree by the first column and A->Z (should be done at the end to avoid performance issues)
-        self.treeWidget.sortByColumn(0, 0)
+        self.treeView.sortByColumn(0, 0)
 
 
-    def display_information(self):
+    def display_information(self, current, previous):
         """
         Fill the text edit with the information taken from the manifest file
         """
 
-        # get the current item of the treeWidget
-        item = self.treeWidget.currentItem()
+        # get the current item of the treeView
+        item = self.list_model.itemFromIndex(self.filter_model.mapToSource(current))
 
         # only children have parents :)
         if item.parent() is not None:
@@ -246,8 +258,8 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
             # loop into the manifest file (self.data = dictionary)
             for layer in self.data['layers']:
 
-                # get the correspondence between the clicked layer in the treeWidget and the title in the dictionary
-                if layer['title'] == item.text(0):
+                # get the correspondence between the clicked layer in the treeView and the title in the dictionary
+                if layer['title'] == item.text():
 
                     text = f'''
                     <h2>Name</h2>
@@ -259,31 +271,29 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
                     '''
 
                     self.summary_text.setHtml(text)
-
-        # just temporary call the method to get the checked items
-        self.get_checked_items()
     
 
     def get_checked_items(self):
         """
         get a list of all the checked items
-        to get the unique id for each layer: item.data(0, Qt.UserRole)
-        TODO: right now only if the item IS SELECTED the system works, not working
-        if the single checkbox is checked 
+        to get the unique id for each layer: item.data(Qt.UserRole)
         """
 
         # get a set to have unique and not repeated data that belongs to different categories
-        self.checked_items = set()
+        checked_items = set()
 
-        for item in self.treeWidget.findItems("", Qt.MatchContains | Qt.MatchRecursive):
-            if item.checkState(0) == Qt.Checked:
+        # loop in the model and list all the items
+        for item in self.list_model.findItems("", Qt.MatchContains | Qt.MatchRecursive):
+            # get only the checked items
+            if item.checkState() == Qt.Checked:
                 # add to the set the Qt.UserRole (AKA label) defined above
-                self.checked_items.add(item.data(0, Qt.UserRole))
+                checked_items.add(item.data(Qt.UserRole))
+        
+        return checked_items
         
     
     def write_json(self, item_list):
         """
-        TODO: handle appending of layers to the file
         method to call when downloading the selected files. Writes a json file
         in the QGreenland folder within the QGIS profile one with the layer
         information that we need. The json is a list of single layers, where each
@@ -316,7 +326,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         We will use the checksum parameter to check if the layer downloaded is
         outdated (has a different checksum) and warn the user.
 
-        :param item_list: set of checked layers in the treeWidget
+        :param item_list: set of checked layers in the treeView
         :type item_list: set
         """
 
@@ -370,35 +380,69 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         
         return downloaded_layers
 
-        
 
     def set_filter_string(self):
+        """
+        method to filter the treeView according to the string entered
+        """
 
+        # get the text of the search_box
         filter_string = self.search_box.text()
-
-        for item in self.treeWidget.findItems(filter_string, Qt.MatchContains | Qt.MatchRecursive, 0):
-            if item.parent():
-                item.parent().removeChild(item)
         
-        if not filter_string:
-            self._fill_tree()
+        # if any text
+        if filter_string:
+            # filter with a wildcard before and after the string
+            self.filter_model.setFilterWildcard('*' + filter_string + '*')
+        else:
+            self.filter_model.setFilterWildcard('')
 
 
-    def check_uncheck(self):
+    def on_item_changed(self, item):
+        """
+        method to set the parent checked or partially checked depending on the
+        children state
 
-        item = self.treeWidget.currentItem()
-        if item and not item.parent():
-            # not recursive so we have only main categories and not single children
-            if item.checkState(0) == Qt.Checked:
-                for num in range(item.childCount()):
-                    child = item.child(num)
-                    child.setCheckState(0, Qt.Checked)
-            # if the category is unchecked, uncheck also the children
-            elif item.checkState(0) == Qt.Unchecked:
-                for num in range(item.childCount()):
-                    child = item.child(num)
-                    child.setCheckState(0, Qt.Unchecked)
+        :param item: QTreeViewItem
+        :type item: QTreeViewItem
+        """
+
+        # if nothing is made just return
+        if self.ignore_model_changes:
+            return
+
+        # it the child is partially checked just return 
+        if item.checkState() == Qt.PartiallyChecked:
+            return
+
+        # set the initial variable to True because something has been made
+        self.ignore_model_changes = True
+
+        # if the parent is checked all the children have to be checked as well
+        # loop into the row count of the item (that is the parent)
+        for row in range(item.rowCount()):
+            # get the child
+            child = item.child(row)
+            # set the child state as the parent one
+            child.setCheckState(item.checkState())   
+
+        # get the check state of the children of the corresponding parent
+        if item.parent():
+            # get the parent
+            parent = item.parent()
+            # test if all the parent's children are checked or unchecked or mixed state
+            children_check_state = [parent.child(row).checkState() for row in range(parent.rowCount())]
+            # if all the children are cheked then set to checked also the parent
+            if all(state == Qt.Checked for state in children_check_state):
+                parent.setCheckState(Qt.Checked)
+            # if all the children are uncheked set to uncheck also the parent
+            elif all(state == Qt.Unchecked for state in children_check_state):
+                parent.setCheckState(Qt.Unchecked)
+            # if just some of the children are checked set the parent as partially checked
+            else:
+                parent.setCheckState(Qt.PartiallyChecked)
         
+        # set the variable to false again to reset the behavior
+        self.ignore_model_changes = False
         
     def download_data(self):
         """
@@ -406,16 +450,18 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         """
 
         # that's the list (or set) of the data to download
-        if self.checked_items:
-            self.write_json(self.checked_items)
+        items = self.get_checked_items()
+        print(items)
+        if items:
+            self.write_json(items)
         
         for layer in self.data['layers']:
             
-            for ii in self.checked_items:
+            for ii in items:
 
                 if layer['id'] == ii:
 
-                    print(layer['assets'][0]['file'])
+                    print(layer['id'], layer['assets'][0]['file'])
         
 
     def browse_folder(self):
@@ -435,6 +481,5 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
             return
         else:
             self.download_button.setEnabled(True)
-            print(self.saving_folder)
 
         self.folder_path.setText(self.saving_folder)
