@@ -136,6 +136,11 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         # go to the next page
         self.stackedWidget.setCurrentIndex(i+1)
 
+        # hide the button on the last page
+        if i == 1:
+            self.next_button.setVisible(False)
+
+
     def _prev(self):
         """
         go to the previous page of the stacked widget
@@ -146,6 +151,10 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # go to the previous page
         self.stackedWidget.setCurrentIndex(i-1)
+
+        # enable the next button an all pages except the last one
+        if i != 1:
+            self.next_button.setVisible(True)
 
     def _download(self):
         """
