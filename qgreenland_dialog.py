@@ -24,7 +24,6 @@
 
 import os
 import json
-import requests
 
 from qgis.PyQt import uic, QtWidgets
 from qgis.PyQt.QtWidgets import (
@@ -32,13 +31,16 @@ from qgis.PyQt.QtWidgets import (
     QSizePolicy,
     QGridLayout
 )
-from qgis.PyQt.QtCore import QSortFilterProxyModel
+from qgis.PyQt.QtCore import QSortFilterProxyModel, QUrl
 from qgis.PyQt.QtGui import QIcon, QStandardItemModel, QStandardItem
 from qgis.PyQt.Qt import Qt
+from qgis.PyQt.QtNetwork import QNetworkRequest
 
 from qgis.core import (
     QgsApplication,
-    Qgis
+    Qgis,
+    QgsNetworkAccessManager,
+
 )
 
 from qgis.gui import (
@@ -180,9 +182,12 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # load the manifest data from the remote url
         # make it persistent as self.data
-        url = 'http://localhost:8080/manifest.json'
-        json_file = requests.get(url)
-        self.data = json.loads(json_file.text)
+
+        url = QUrl('http://localhost:8080/manifest.json')
+        network_request = QNetworkRequest(url)
+        reply = QgsNetworkAccessManager.instance().blockingGet(network_request)
+        reply_content = reply.content()
+        self.data = json.loads(reply_content.data().decode())
         
         # empty list of all the hierarchies
         hierarchy = []
@@ -451,7 +456,6 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # that's the list (or set) of the data to download
         items = self.get_checked_items()
-        print(items)
         if items:
             self.write_json(items)
         
@@ -462,6 +466,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
                 if layer['id'] == ii:
 
                     print(layer['id'], layer['assets'][0]['file'])
+                    print('http://localhost:8080' + '/' + layer['id'] + '/' + layer['assets'][0]['file'])
         
 
     def browse_folder(self):
