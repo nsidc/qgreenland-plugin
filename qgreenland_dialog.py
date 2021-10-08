@@ -65,6 +65,8 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         self.filter_model = QSortFilterProxyModel(self)
         # set the itemModel to the QSortFilterProxyModel
         self.filter_model.setSourceModel(self.list_model)
+        self.filter_model.setRecursiveFilteringEnabled(True)
+        self.filter_model.setFilterCaseSensitivity(False)
 
         # set the QStandardItemModel to the treeView
         self.treeView.setModel(self.filter_model)
