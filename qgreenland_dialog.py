@@ -490,25 +490,28 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
 
             # if we have data (default links have been chosen) then get the url from teh data
             # if a custom url has been entered get the text else get the text
-            # if self.server_list_combo.currentData():
-            #     downloading_url = self.server_list_combo.currentData()
-            # else:
-            #     downloading_url = self.server_list_combo.currentText()
+            if self.server_list_combo.currentData():
+                downloading_url = self.server_list_combo.currentData()
+            else:
+                downloading_url = self.server_list_combo.currentText()
 
-            # downloading_url = downloading_url + '/' + parent + '/' + item
+            # just for now
+            downloading_url = 'http://localhost:8080/'
+
+            downloading_url = downloading_url + '/' + parent + '/' + item
 
             # create a network request and the corresponding reply object
-            # url = QUrl(downloading_url)
-            # network_request = QNetworkRequest(url)
-            # reply = QgsNetworkAccessManager.instance().blockingGet(network_request)
-            # reply_content = reply.content()
+            url = QUrl(downloading_url)
+            network_request = QNetworkRequest(url)
+            reply = QgsNetworkAccessManager.instance().blockingGet(network_request)
+            reply_content = reply.content()
 
             # create the path to where to save the file
-            # saving_path = os.path.join(self.saving_folder, item)
+            saving_path = os.path.join(self.saving_folder, item)
 
-            # # write the reply to a file
-            # with open(saving_path, 'wb') as f:
-            #     f.write(reply_content)
+            # write the reply to a file
+            with open(saving_path, 'wb') as f:
+                f.write(reply_content)
 
 
         
