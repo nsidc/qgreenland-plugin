@@ -92,6 +92,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         self.treeView.selectionModel().currentChanged.connect(self.display_information)
 
         self.list_model.itemChanged.connect(self.on_item_changed)
+        self.list_model.itemChanged.connect(self.get_checked_items)
 
         # when the text changes connect to the filter function
         self.search_box.textChanged.connect(self.set_filter_string)
@@ -111,6 +112,8 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         # se the download button to not enabled (it will only if a folder has been chosen)
         self.download_button.setEnabled(False)
 
+        self.stackedWidget.currentChanged.connect(self.on_page_changed)
+
 
     def _user_profile_folder(self):
         """
@@ -127,6 +130,35 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         except FileExistsError as e:
             pass
 
+    def on_page_changed(self):
+        """
+        enable/disable set as visible/not visible the next button depening
+        on different conditions
+        """
+
+        # get the current page name
+        page_name = self.stackedWidget.currentWidget().objectName()
+
+        # get the set of all the checked items (children) pf the QTreeView
+        items = self.get_checked_items()
+
+        # hide the next button on the last page
+        if page_name == 'download_page':
+            self.next_button.setVisible(False)
+        else:
+            self.next_button.setVisible(True)
+
+        # disable the next button default on the list_page
+        if page_name == 'list_page':
+            self.next_button.setEnabled(False)
+        else:
+            self.next_button.setEnabled(True)
+
+        # enable the next button only if there are some checked items in the list
+        if items:
+            self.next_button.setEnabled(True)
+
+
     def _next(self):
         """
         go to the next page of the stacked widget
@@ -138,11 +170,6 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         # go to the next page
         self.stackedWidget.setCurrentIndex(i+1)
 
-        # hide the button on the last page
-        if i == 1:
-            self.next_button.setVisible(False)
-
-
     def _prev(self):
         """
         go to the previous page of the stacked widget
@@ -153,10 +180,6 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # go to the previous page
         self.stackedWidget.setCurrentIndex(i-1)
-
-        # enable the next button an all pages except the last one
-        if i != 1:
-            self.next_button.setVisible(True)
 
     def _download(self):
         """
@@ -305,6 +328,12 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
                 # add to the set the Qt.UserRole (AKA label) defined above
                 checked_items.add(item.data(Qt.UserRole))
         
+        # enable the next button if there are some chosen items in the list
+        if not checked_items:
+            self.next_button.setEnabled(False)
+        else:
+            self.next_button.setEnabled(True)
+
         return checked_items
         
     
