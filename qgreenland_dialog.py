@@ -438,8 +438,10 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         if filter_string:
             # filter with a wildcard before and after the string
             self.filter_model.setFilterWildcard('*' + filter_string + '*')
+            self.treeView.expandAll()
         else:
             self.filter_model.setFilterWildcard('')
+            self.treeView.collapseAll()
 
 
     def on_item_changed(self, item):
