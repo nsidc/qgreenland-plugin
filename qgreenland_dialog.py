@@ -115,7 +115,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         self.stackedWidget.currentChanged.connect(self.on_page_changed)
 
         # initialize the QgsSettings
-        self.s = QgsSettings()
+        self.settings = QgsSettings()
 
 
     def _user_profile_folder(self):
@@ -556,7 +556,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         """
 
         # get the saving_path chosen: return None if empty
-        saving_path = self.s.value("qgreenland-plugin-saving_folder")
+        saving_path = self.settings.value("qgreenland-plugin-saving_folder")
 
         self.saving_folder = QFileDialog.getExistingDirectory(
             None,
@@ -566,7 +566,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         )
 
         # remember the last folder chosen
-        self.s.setValue("qgreenland-plugin-saving_folder", self.saving_folder)
+        self.settings.setValue("qgreenland-plugin-saving_folder", self.saving_folder)
 
         if not self.saving_folder:
             self.bar.pushMessage(self.tr("You have to select a folder where to save the data"), "", level=Qgis.Critical, duration=-1)
