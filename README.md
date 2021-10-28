@@ -1,4 +1,12 @@
-# Development install
+# About
+
+The QGreenland Plugin allows direct access to QGreenland layers without
+downloading the full QGreenland Package.
+
+
+# Development
+
+## Install
 
 Install the plugin by symlinking this repository to your plugins directory,
 e.g.:
