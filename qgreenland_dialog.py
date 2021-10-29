@@ -52,6 +52,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'qgreenland_dialog_base.ui'))
 
 
+
 class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
     def __init__(self, parent=None):
         """Constructor."""
@@ -84,6 +85,8 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         self.next_button.clicked.connect(self._next)
         self.prev_button.clicked.connect(self._prev)
 
+        self.close_button.clicked.connect(self._close)
+
         # add to the server_list combobox the URLS
         self.server_list_combo.addItem(self.tr('NSIDC: https://nsidc.org/qgreenland'), 'https://nsidc.org/qgreenland')
         self.server_list_combo.addItem(self.tr('PGC: https://example.com/qgreenland'), 'https://example.com/qgreenland')
@@ -109,8 +112,11 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         # connect the Browse button to the choose folder method
         self.browse_button.clicked.connect(self.browse_folder)
 
-        # se the download button to not enabled (it will only if a folder has been chosen)
+        # set the download button to not enabled (it will only if a folder has been chosen)
         self.download_button.setEnabled(False)
+
+        # set the close button to not visible at the launch of the plugin
+        self.close_button.setVisible(False)
 
         self.stackedWidget.currentChanged.connect(self.on_page_changed)
 
@@ -145,12 +151,14 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         # hide the next button on the last page
         if page_name == 'download_page':
             self.next_button.setVisible(False)
+            self.close_button.setVisible(True)
         else:
             self.next_button.setVisible(True)
 
         # disable the next button default on the list_page
         if page_name == 'list_page':
             self.next_button.setEnabled(False)
+            self.close_button.setVisible(False)
         else:
             self.next_button.setEnabled(True)
 
@@ -180,6 +188,12 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # go to the previous page
         self.stackedWidget.setCurrentIndex(i-1)
+
+    def _close(self):
+        """
+        close the main dialog window when a signal is fired
+        """
+        self.close()
 
     def _download(self):
         """
