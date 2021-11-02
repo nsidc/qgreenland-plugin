@@ -40,7 +40,7 @@ from qgis.core import (
     QgsApplication,
     Qgis,
     QgsNetworkAccessManager,
-
+    QgsSettings
 )
 
 from qgis.gui import (
@@ -119,6 +119,9 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         self.close_button.setVisible(False)
 
         self.stackedWidget.currentChanged.connect(self.on_page_changed)
+
+        # initialize the QgsSettings
+        self.settings = QgsSettings()
 
 
     def _user_profile_folder(self):
@@ -561,18 +564,23 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
                 f.write(reply_content)
 
 
-        
     def browse_folder(self):
         """
         open a QDialog to choose the folder where to save the data
         """
 
+        # get the saving_path chosen: return None if empty
+        saving_path = self.settings.value("qgreenland-plugin-saving_folder")
+
         self.saving_folder = QFileDialog.getExistingDirectory(
             None,
             self.tr("Choose a directory to save the data"),
-            "",
+            saving_path,
             QFileDialog.ShowDirsOnly
         )
+
+        # remember the last folder chosen
+        self.settings.setValue("qgreenland-plugin-saving_folder", self.saving_folder)
 
         if not self.saving_folder:
             self.bar.pushMessage(self.tr("You have to select a folder where to save the data"), "", level=Qgis.Critical, duration=-1)
