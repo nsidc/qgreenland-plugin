@@ -88,7 +88,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         self.close_button.clicked.connect(self._close)
 
         # add to the server_list combobox the URLS
-        self.server_list_combo.addItem(self.tr('NSIDC: https://nsidc.org/qgreenland'), 'https://nsidc.org/qgreenland')
+        self.server_list_combo.addItem(self.tr('NSIDC: http://qgreenland.apps.nsidc.org/layers/'), 'http://qgreenland.apps.nsidc.org/layers/')
         self.server_list_combo.addItem(self.tr('PGC: https://example.com/qgreenland'), 'https://example.com/qgreenland')
 
         # pressing (not only selecting or checking) on an item fills the information
@@ -234,7 +234,8 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         # load the manifest data from the remote url
         # make it persistent as self.data
 
-        url = QUrl('http://localhost:8080/manifest.json')
+        # url = QUrl('http://localhost:8080/manifest.json')
+        url = QUrl(self.server_list_combo.currentData() + 'manifest.json')
         network_request = QNetworkRequest(url)
         reply = QgsNetworkAccessManager.instance().blockingGet(network_request)
         reply_content = reply.content()
@@ -531,14 +532,13 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         # clear the download label text
         self.download_label.setText("")
 
-        # TODO: put here the method to download the data (now in commented text)
         # loop on the dictionary of layers and move the progress bar
         for current, (parent, item) in enumerate(layer_to_download.items()):
 
             self.download_label.setText(f"Downloading {item} {current + 1} of {len(layer_to_download)}")
             self.progressBar.setValue(int((current + 1) * total))
 
-            # if we have data (default links have been chosen) then get the url from teh data
+            # if we have data (default links have been chosen) then get the url from the data
             # if a custom url has been entered get the text else get the text
             if self.server_list_combo.currentData():
                 downloading_url = self.server_list_combo.currentData()
@@ -546,7 +546,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
                 downloading_url = self.server_list_combo.currentText()
 
             # just for now
-            downloading_url = 'http://localhost:8080/'
+            # downloading_url = 'http://localhost:8080/'
 
             downloading_url = downloading_url + '/' + parent + '/' + item
 
