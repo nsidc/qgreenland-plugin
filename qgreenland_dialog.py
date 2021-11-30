@@ -241,16 +241,6 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         reply_content = reply.content()
         self.data = json.loads(reply_content.data().decode())
 
-        # empty list of all the hierarchies
-        hierarchy = []
-        # loop and grab all the hierarchies of all layers
-        for layer in self.data['layers']:
-            for h in layer['hierarchy']:
-                hierarchy.append(h)
-
-        # use set to avoid duplicates
-        hierarchy = list(set(hierarchy))
-
         # loop into the hierarchies and fill the QTreeView with them
         for layer in self.data['layers']:
             layer_hierarchy = layer['hierarchy']
