@@ -31,7 +31,7 @@ from qgis.PyQt.QtWidgets import (
     QSizePolicy,
     QGridLayout
 )
-from qgis.PyQt.QtCore import QSortFilterProxyModel, QUrl
+from qgis.PyQt.QtCore import QSortFilterProxyModel, QUrl, QModelIndex
 from qgis.PyQt.QtGui import QIcon, QStandardItemModel, QStandardItem
 from qgis.PyQt.Qt import Qt
 from qgis.PyQt.QtNetwork import QNetworkRequest
@@ -102,7 +102,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # connect to the methods that creates the QGreenland folder if not exists
         self._user_profile_folder()
-        
+
         # fill the treeView with the json information
         self._fill_tree()
 
@@ -211,7 +211,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def _fill_tree(self):
         """
-        Fill hte treeView with the json file creating QTreeViewItem items
+        Fill the treeView with the json file creating QTreeViewItem items
         and parents
 
         Sets the items as checkable and unchecked by default
@@ -224,7 +224,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         # file with the downloaded information of the files
         if os.path.exists(os.path.join(self.qgreenland_path, 'layers.json')):
             downloaded_layers = self.read_json(os.path.join(self.qgreenland_path, 'layers.json'))
-        
+
         # temporary read the manifest local json file
         # make it persistent as self.data
         # json_file = os.path.join(os.path.dirname(__file__), 'manifest.json')
@@ -240,62 +240,76 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         reply = QgsNetworkAccessManager.instance().blockingGet(network_request)
         reply_content = reply.content()
         self.data = json.loads(reply_content.data().decode())
-        
+
         # empty list of all the hierarchies
         hierarchy = []
         # loop and grab all the hierarchies of all layers
         for layer in self.data['layers']:
             for h in layer['hierarchy']:
                 hierarchy.append(h)
-        
+
         # use set to avoid duplicates
         hierarchy = list(set(hierarchy))
 
         # loop into the hierarchies and fill the QTreeView with them
-        for h in hierarchy:
+        for layer in self.data['layers']:
+            layer_hierarchy = layer['hierarchy']
+            parent_item = None
 
-            item = QStandardItem(h)
-            item.setFlags(Qt.ItemIsEnabled|Qt.ItemIsSelectable|Qt.ItemIsUserCheckable)
-            item.setCheckState( Qt.Unchecked) # first columun, checkable, checked=0
-            self.list_model.appendRow([item])
+            while layer_hierarchy:
+                parent_text = layer_hierarchy[0]
+                del layer_hierarchy[0]
 
-            # loop in all the layers of the json
-            for layer in self.data['layers']:
+                # try to find existing item for this group
+                if parent_item:
+                    start_index = self.list_model.index(0, 0, self.list_model.indexFromItem(parent_item))
+                else:
+                    start_index = self.list_model.index(0,0, QModelIndex())
+                candidate_indices = self.list_model.match(start_index, Qt.DisplayRole, parent_text, flags=Qt.MatchExactly)
 
-                # check the hierarchy of the single layer to correct inser it as a child
-                if h in layer['hierarchy']:
-                    
-                    # create the child (checkable)
-                    child = QStandardItem(layer['title'])
-                    # set the custom data for the item as the unique id of each layer
-                    child.setData(layer['id'], Qt.UserRole)
-                    child.setFlags(Qt.ItemIsEnabled|Qt.ItemIsSelectable|Qt.ItemIsUserCheckable)
-                    # to add an icon to the single item
-                    # child.setIcon(0, QIcon(os.path.join(os.path.dirname(__file__), 'qgreenland-icon.png')))
-                    child.setCheckState(Qt.Unchecked)
+                if not candidate_indices:
+                    new_parent_item = QStandardItem(parent_text)
+                    new_parent_item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsUserCheckable)
+                    new_parent_item.setCheckState(Qt.Unchecked)  # first columun, checkable, checked=0
+                    if parent_item:
+                        parent_item.appendRow([new_parent_item])
+                    else:
+                        self.list_model.appendRow([new_parent_item])
+                    parent_item = new_parent_item
+                else:
+                    parent_item = self.list_model.itemFromIndex(candidate_indices[0])
 
-                    # add the icons depending on the checksum
-                    # only if the json file in the profile folder exists
-                    try:
-                        for static_layer in downloaded_layers:
-                            for i in static_layer['assets']:
-                                # check if the layer of the manifest is in the static json file of the profile folder
-                                if layer['id'] in static_layer['id']:
-                                    # get the data type - the layer
-                                    if i['type'] == 'data':
-                                        # if the checksum is the same - we have the most recent layer downloaded
-                                        if layer['assets'][0]['checksum'] == i['checksum']:
-                                            child.setIcon(QIcon(os.path.join(os.path.dirname(__file__), 'icons','uptodate.png')))
-                                            child.setToolTip(self.tr("You already have the most recent data downloaded"))
-                                        # if the checksum is not the same - warn the user with the specified icon
-                                        elif layer['assets'][0]['checksum'] != i['checksum']:
-                                            child.setIcon(QIcon(os.path.join(os.path.dirname(__file__), 'icons','outdate.png')))
-                                            child.setToolTip(self.tr("A more recent version of the file is available"))
-                    except:
-                        pass
-        
-                    # add the child to the parent item
-                    item.appendRow([child])
+            # create the child (checkable)
+            child = QStandardItem(layer['title'])
+            # set the custom data for the item as the unique id of each layer
+            child.setData(layer['id'], Qt.UserRole)
+            child.setFlags(Qt.ItemIsEnabled|Qt.ItemIsSelectable|Qt.ItemIsUserCheckable)
+            # to add an icon to the single item
+            # child.setIcon(0, QIcon(os.path.join(os.path.dirname(__file__), 'qgreenland-icon.png')))
+            child.setCheckState(Qt.Unchecked)
+
+            # add the icons depending on the checksum
+            # only if the json file in the profile folder exists
+            try:
+                for static_layer in downloaded_layers:
+                    for i in static_layer['assets']:
+                        # check if the layer of the manifest is in the static json file of the profile folder
+                        if layer['id'] in static_layer['id']:
+                            # get the data type - the layer
+                            if i['type'] == 'data':
+                                # if the checksum is the same - we have the most recent layer downloaded
+                                if layer['assets'][0]['checksum'] == i['checksum']:
+                                    child.setIcon(QIcon(os.path.join(os.path.dirname(__file__), 'icons','uptodate.png')))
+                                    child.setToolTip(self.tr("You already have the most recent data downloaded"))
+                                # if the checksum is not the same - warn the user with the specified icon
+                                elif layer['assets'][0]['checksum'] != i['checksum']:
+                                    child.setIcon(QIcon(os.path.join(os.path.dirname(__file__), 'icons','outdate.png')))
+                                    child.setToolTip(self.tr("A more recent version of the file is available"))
+            except:
+                pass
+
+            # add the child to the parent item
+            parent_item.appendRow([child])
 
         # sort the tree by the first column and A->Z (should be done at the end to avoid performance issues)
         self.treeView.sortByColumn(0, 0)
@@ -328,7 +342,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
                     '''
 
                     self.summary_text.setHtml(text)
-    
+
 
     def get_checked_items(self):
         """
@@ -345,7 +359,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
             if item.checkState() == Qt.Checked:
                 # add to the set the Qt.UserRole (AKA label) defined above
                 checked_items.add(item.data(Qt.UserRole))
-        
+
         # enable the next button if there are some chosen items in the list
         if not checked_items:
             self.next_button.setEnabled(False)
@@ -353,8 +367,8 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
             self.next_button.setEnabled(True)
 
         return checked_items
-        
-    
+
+
     def write_json(self, item_list):
         """
         method to call when downloading the selected files. Writes a json file
@@ -410,7 +424,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         for item in item_list:
             # temporary dictionary that will be filled with the layer information
             d = {}
-            
+
             for layer in self.data['layers']:
                 # check if the if of the whole layer list is both a checked item
                 # and is not in the set
@@ -440,7 +454,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
 
         with open(json_path, 'r') as json_file:
             downloaded_layers = json.load(json_file)
-        
+
         return downloaded_layers
 
 
@@ -451,7 +465,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # get the text of the search_box
         filter_string = self.search_box.text()
-        
+
         # if any text
         if filter_string:
             # filter with a wildcard before and after the string
@@ -475,7 +489,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         if self.ignore_model_changes:
             return
 
-        # it the child is partially checked just return 
+        # it the child is partially checked just return
         if item.checkState() == Qt.PartiallyChecked:
             return
 
@@ -488,7 +502,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
             # get the child
             child = item.child(row)
             # set the child state as the parent one
-            child.setCheckState(item.checkState())   
+            child.setCheckState(item.checkState())
 
         # get the check state of the children of the corresponding parent
         if item.parent():
@@ -505,10 +519,10 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
             # if just some of the children are checked set the parent as partially checked
             else:
                 parent.setCheckState(Qt.PartiallyChecked)
-        
+
         # set the variable to false again to reset the behavior
         self.ignore_model_changes = False
-        
+
     def download_data(self):
         """
         method that downloads all the selected data (AKA checked items)
@@ -525,7 +539,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
             for current, parent in enumerate(items):
                 if layer['id'] == parent:
                     layer_to_download[parent] = layer['assets'][0]['file']
-        
+
         # just get the length of the list divided by 100
         total = 100 / len(layer_to_download)
 
