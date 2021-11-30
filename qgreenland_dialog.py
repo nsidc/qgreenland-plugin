@@ -504,21 +504,36 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
             # set the child state as the parent one
             child.setCheckState(item.checkState())
 
-        # get the check state of the children of the corresponding parent
-        if item.parent():
-            # get the parent
-            parent = item.parent()
+        # if the parent is checked all the children have to be checked as well
+        # loop into the row count of the item (that is the parent)
+        def check_recursive(item, check_state):
+            item.setCheckState(check_state)
+            for row in range(item.rowCount()):
+                # get the child
+                check_recursive(item.child(row), check_state)
+
+        for row in range(item.rowCount()):
+            check_recursive(item.child(row), item.checkState())
+
+        # get the check state of the children of the corresponding parent -- we need to do this recursively
+        def set_parent_check_state(parent):
             # test if all the parent's children are checked or unchecked or mixed state
             children_check_state = [parent.child(row).checkState() for row in range(parent.rowCount())]
-            # if all the children are cheked then set to checked also the parent
+            # if all the children are checked then set to checked also the parent
             if all(state == Qt.Checked for state in children_check_state):
                 parent.setCheckState(Qt.Checked)
-            # if all the children are uncheked set to uncheck also the parent
+            # if all the children are unchecked set to uncheck also the parent
             elif all(state == Qt.Unchecked for state in children_check_state):
                 parent.setCheckState(Qt.Unchecked)
             # if just some of the children are checked set the parent as partially checked
             else:
                 parent.setCheckState(Qt.PartiallyChecked)
+
+            if parent.parent():
+                set_parent_check_state(parent.parent())
+
+        if item.parent():
+            set_parent_check_state(item.parent())
 
         # set the variable to false again to reset the behavior
         self.ignore_model_changes = False
