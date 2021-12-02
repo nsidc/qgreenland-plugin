@@ -321,6 +321,8 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
 
                 # get the correspondence between the clicked layer in the treeView and the title in the dictionary
                 if layer['title'] == item.text():
+                    # Format layer details, replacing newlines with html `<br>` elements.
+                    layer_details = layer['layer_details'].replace('\n', '<br>')
 
                     text = f'''
                     <h2>Name</h2>
@@ -328,7 +330,7 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
                     <h2>Description</h2>
                     {layer['description']}
                     <h2>Details</h2>
-                    {layer['layer_details']}
+                    {layer_details}
                     '''
 
                     self.summary_text.setHtml(text)
