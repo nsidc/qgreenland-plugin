@@ -123,6 +123,14 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         # initialize the QgsSettings
         self.settings = QgsSettings()
 
+        # get the path of the folder (empty if the setting is not there)
+        self.saving_path = self.settings.value("qgreenland-plugin-saving_folder")
+        if self.saving_path:
+            # set the text box with the path
+            self.folder_path.setText(self.saving_path)
+            # also enable the download button
+            self.download_button.setEnabled(True)
+
 
     def _user_profile_folder(self):
         """
@@ -540,12 +548,16 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         if items:
             self.write_json(items)
 
-        # get the dictionary of all the layer to be downloaded with key=folder and value=layer name
+        # get the dictionary of all the layer to be downloaded with key=folder
+        # and value=list of all layer assets. e.g d={land: ['land.gpkg', 'provenance.txt']}
         layer_to_download = {}
         for layer in self.data['layers']:
+            files_to_download = []
             for current, parent in enumerate(items):
                 if layer['id'] == parent:
-                    layer_to_download[parent] = layer['assets'][0]['file']
+                    for asset in layer['assets']:
+                        files_to_download.append(asset['file'])
+                    layer_to_download[parent] = files_to_download
 
         # just get the length of the list divided by 100
         total = 100 / len(layer_to_download)
@@ -557,32 +569,42 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         for current, (parent, item) in enumerate(layer_to_download.items()):
 
             self.download_label.setText(f"Downloading {item} {current + 1} of {len(layer_to_download)}")
-            self.progressBar.setValue(int((current + 1) * total))
 
-            # if we have data (default links have been chosen) then get the url from the data
-            # if a custom url has been entered get the text else get the text
-            if self.server_list_combo.currentData():
-                downloading_url = self.server_list_combo.currentData()
-            else:
-                downloading_url = self.server_list_combo.currentText()
 
             # just for now
             # downloading_url = 'http://localhost:8080/'
 
-            downloading_url = downloading_url + '/' + parent + '/' + item
+            # loop in all the assets of the layer and download them
+            for asset in item:
 
-            # create a network request and the corresponding reply object
-            url = QUrl(downloading_url)
-            network_request = QNetworkRequest(url)
-            reply = QgsNetworkAccessManager.instance().blockingGet(network_request)
-            reply_content = reply.content()
+                # if we have data (default links have been chosen) then get the url from the data
+                # if a custom url has been entered get the text else get the text
+                if self.server_list_combo.currentData():
+                    downloading_url = self.server_list_combo.currentData()
+                else:
+                    downloading_url = self.server_list_combo.currentText()
 
-            # create the path to where to save the file
-            saving_path = os.path.join(self.saving_folder, item)
+                # get the downloading url from ther server item, the parent and finally the asset
+                downloading_url = downloading_url + parent + '/' + asset
 
-            # write the reply to a file
-            with open(saving_path, 'wb') as f:
-                f.write(reply_content)
+                # create a network request and the corresponding reply object
+                url = QUrl(downloading_url)
+                network_request = QNetworkRequest(url)
+                reply = QgsNetworkAccessManager.instance().blockingGet(network_request)
+                reply_content = reply.content()
+
+                # create the folder for each layer: each file is placed within
+                # a folder named after the layer id
+                # overwrite the folder if it already exists
+                os.makedirs(os.path.join(self.saving_folder, parent), exist_ok=True)
+                # get the path to where to save the file
+                saving_path = os.path.join(self.saving_folder, parent, asset)
+
+                # write the reply to a file
+                with open(saving_path, 'wb') as f:
+                    f.write(reply_content)
+            
+            self.progressBar.setValue(int((current + 1) * total))
 
 
     def browse_folder(self):
@@ -590,23 +612,23 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         open a QDialog to choose the folder where to save the data
         """
 
-        # get the saving_path chosen: return None if empty
-        saving_path = self.settings.value("qgreenland-plugin-saving_folder")
-
+        # call the method to choose the folder where to save the data
         self.saving_folder = QFileDialog.getExistingDirectory(
             None,
             self.tr("Choose a directory to save the data"),
-            saving_path,
+            self.saving_path, # grab the saving path saved in the QgsSetting (will be None if nothing is there)
             QFileDialog.ShowDirsOnly
         )
 
-        # remember the last folder chosen
+        # remember the last folder chosen and store it in the QgsSetting
         self.settings.setValue("qgreenland-plugin-saving_folder", self.saving_folder)
 
+        # if no saving folder have been chosen raise an exception and return
         if not self.saving_folder:
             self.bar.pushMessage(self.tr("You have to select a folder where to save the data"), "", level=Qgis.Critical, duration=-1)
             return
         else:
             self.download_button.setEnabled(True)
 
+        # set the text box with the folder path chosen
         self.folder_path.setText(self.saving_folder)
