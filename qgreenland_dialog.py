@@ -540,12 +540,16 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         if items:
             self.write_json(items)
 
-        # get the dictionary of all the layer to be downloaded with key=folder and value=layer name
+        # get the dictionary of all the layer to be downloaded with key=folder
+        # and value=list of all layer assets. e.g d={land: ['land.gpkg', 'provenance.txt']}
         layer_to_download = {}
         for layer in self.data['layers']:
+            files_to_download = []
             for current, parent in enumerate(items):
                 if layer['id'] == parent:
-                    layer_to_download[parent] = layer['assets'][0]['file']
+                    for asset in layer['assets']:
+                        files_to_download.append(asset['file'])
+                    layer_to_download[parent] = files_to_download
 
         # just get the length of the list divided by 100
         total = 100 / len(layer_to_download)
@@ -557,32 +561,42 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         for current, (parent, item) in enumerate(layer_to_download.items()):
 
             self.download_label.setText(f"Downloading {item} {current + 1} of {len(layer_to_download)}")
-            self.progressBar.setValue(int((current + 1) * total))
 
-            # if we have data (default links have been chosen) then get the url from the data
-            # if a custom url has been entered get the text else get the text
-            if self.server_list_combo.currentData():
-                downloading_url = self.server_list_combo.currentData()
-            else:
-                downloading_url = self.server_list_combo.currentText()
 
             # just for now
             # downloading_url = 'http://localhost:8080/'
 
-            downloading_url = downloading_url + '/' + parent + '/' + item
+            # loop in all the assets of the layer and download them
+            for asset in item:
 
-            # create a network request and the corresponding reply object
-            url = QUrl(downloading_url)
-            network_request = QNetworkRequest(url)
-            reply = QgsNetworkAccessManager.instance().blockingGet(network_request)
-            reply_content = reply.content()
+                # if we have data (default links have been chosen) then get the url from the data
+                # if a custom url has been entered get the text else get the text
+                if self.server_list_combo.currentData():
+                    downloading_url = self.server_list_combo.currentData()
+                else:
+                    downloading_url = self.server_list_combo.currentText()
 
-            # create the path to where to save the file
-            saving_path = os.path.join(self.saving_folder, item)
+                # get the downloading url from ther server item, the parent and finally the asset
+                downloading_url = downloading_url + parent + '/' + asset
 
-            # write the reply to a file
-            with open(saving_path, 'wb') as f:
-                f.write(reply_content)
+                # create a network request and the corresponding reply object
+                url = QUrl(downloading_url)
+                network_request = QNetworkRequest(url)
+                reply = QgsNetworkAccessManager.instance().blockingGet(network_request)
+                reply_content = reply.content()
+
+                # create the folder for each layer: each file is placed within
+                # a folder named after the layer id
+                # overwrite the folder if it already exists
+                os.makedirs(os.path.join(self.saving_folder, parent), exist_ok=True)
+                # get the path to where to save the file
+                saving_path = os.path.join(self.saving_folder, parent, asset)
+
+                # write the reply to a file
+                with open(saving_path, 'wb') as f:
+                    f.write(reply_content)
+            
+            self.progressBar.setValue(int((current + 1) * total))
 
 
     def browse_folder(self):
