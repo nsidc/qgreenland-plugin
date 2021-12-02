@@ -204,6 +204,10 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
 
             # always set the progress bar to 0 when not in the downloading page
             self.progressBar.setValue(0)
+            # reset also the progress bar text
+            self.progressBar.setFormat("")
+            # clear the download label text
+            self.download_label.setText("")
         else:
             self.next_button.setEnabled(True)
 
@@ -582,6 +586,9 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
         if items:
             self.write_json(items)
 
+        # variable to store the total bytes that will be downloaded
+        total_size = 0
+
         # get the dictionary of all the layer to be downloaded with key=folder
         # and value=list of all layer assets. e.g d={land: ['land.gpkg', 'provenance.txt']}
         layer_to_download = {}
@@ -591,19 +598,22 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
                 if layer['id'] == parent:
                     for asset in layer['assets']:
                         files_to_download.append(asset['file'])
+                        total_size+=asset['size_bytes']
+                        print(asset['size_bytes'])
                     layer_to_download[parent] = files_to_download
+        
+        # get the bytes in megabytes
+        total_size = total_size / 1000000
 
         # just get the length of the list divided by 100
         total = 100 / len(layer_to_download)
 
-        # clear the download label text
-        self.download_label.setText("")
-
         # loop on the dictionary of layers and move the progress bar
         for current, (parent, item) in enumerate(layer_to_download.items()):
 
-            self.download_label.setText(f"Downloading {item} {current + 1} of {len(layer_to_download)}")
-
+            # set the downloading text
+            downloading_text = f"Downloading {parent} {current + 1} of {len(layer_to_download)} layers"
+            self.download_label.setText(downloading_text)
 
             # just for now
             # downloading_url = 'http://localhost:8080/'
@@ -632,7 +642,10 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
                     f.write(reply_content)
             
             self.progressBar.setValue(int((current + 1) * total))
-
+        
+        # set the final progress bar text with the amount of megabytes downloaded
+        self.progressBar.setFormat(f"{total_size:,} MB have been downloaded")
+        
 
     def browse_folder(self):
         """
