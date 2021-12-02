@@ -201,6 +201,9 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
             self.prev_button.setVisible(False)
             self.next_button.setEnabled(False)
             self.close_button.setVisible(False)
+
+            # always set the progress bar to 0 when not in the downloading page
+            self.progressBar.setValue(0)
         else:
             self.next_button.setEnabled(True)
 
