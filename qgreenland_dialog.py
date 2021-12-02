@@ -123,6 +123,14 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         # initialize the QgsSettings
         self.settings = QgsSettings()
 
+        # get the path of the folder (empty if the setting is not there)
+        self.saving_path = self.settings.value("qgreenland-plugin-saving_folder")
+        if self.saving_path:
+            # set the text box with the path
+            self.folder_path.setText(self.saving_path)
+            # also enable the download button
+            self.download_button.setEnabled(True)
+
 
     def _user_profile_folder(self):
         """
@@ -604,23 +612,23 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
         open a QDialog to choose the folder where to save the data
         """
 
-        # get the saving_path chosen: return None if empty
-        saving_path = self.settings.value("qgreenland-plugin-saving_folder")
-
+        # call the method to choose the folder where to save the data
         self.saving_folder = QFileDialog.getExistingDirectory(
             None,
             self.tr("Choose a directory to save the data"),
-            saving_path,
+            self.saving_path, # grab the saving path saved in the QgsSetting (will be None if nothing is there)
             QFileDialog.ShowDirsOnly
         )
 
-        # remember the last folder chosen
+        # remember the last folder chosen and store it in the QgsSetting
         self.settings.setValue("qgreenland-plugin-saving_folder", self.saving_folder)
 
+        # if no saving folder have been chosen raise an exception and return
         if not self.saving_folder:
             self.bar.pushMessage(self.tr("You have to select a folder where to save the data"), "", level=Qgis.Critical, duration=-1)
             return
         else:
             self.download_button.setEnabled(True)
 
+        # set the text box with the folder path chosen
         self.folder_path.setText(self.saving_folder)
