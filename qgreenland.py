@@ -28,7 +28,8 @@ from qgis.PyQt.QtWidgets import QAction
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
-from .qgreenland_dialog import QGreenlandDialog
+from .qgreenland_dowload import QGreenlandDownload
+from .qgreenland_server import QGreenlandServer
 import os.path
 
 
@@ -163,9 +164,17 @@ class QGreenland:
         icon_path = ':/plugins/qgreenland/qgreenland-icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'QGreenland'),
-            callback=self.run,
+            text=self.tr(u'Configure the Server'),
+            callback=self.run_server,
+            add_to_toolbar=False,
             parent=self.iface.mainWindow())
+
+        self.add_action(
+            icon_path,
+            text=self.tr(u'Download Data'),
+            callback=self.run_download,
+            parent=self.iface.mainWindow())
+
 
         # will be set False in run()
         self.first_start = True
@@ -180,14 +189,14 @@ class QGreenland:
             self.iface.removeToolBarIcon(action)
 
 
-    def run(self):
+    def run_download(self):
         """Run method that performs all the real work"""
 
         # Create the dialog with elements (after translation) and keep reference
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
         if self.first_start == True:
             self.first_start = False
-            self.dlg = QGreenlandDialog()
+            self.dlg = QGreenlandDownload()
 
         # show the dialog
         self.dlg.show()
@@ -197,4 +206,12 @@ class QGreenland:
         if result:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
+            pass
+    
+    def run_server(self):
+        
+        self.server_dlg = QGreenlandServer()
+        result = self.server_dlg.exec()
+
+        if result:
             pass
