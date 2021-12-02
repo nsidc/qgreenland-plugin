@@ -118,9 +118,12 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
         # set the download button to not enabled (it will only if a folder has been chosen)
         self.download_button.setEnabled(False)
 
-        # set the close button to not visible at the launch of the plugin
+        # set the initial condition of the buttons
+        self.prev_button.setVisible(False)
+        self.next_button.setEnabled(False)
         self.close_button.setVisible(False)
 
+        # connect the chaning page of teh widget to the correct method
         self.stackedWidget.currentChanged.connect(self.on_page_changed)
 
         # get the path of the folder (empty if the setting is not there)
@@ -187,6 +190,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
 
         # hide the next button on the last page
         if page_name == 'download_page':
+            self.prev_button.setVisible(True)
             self.next_button.setVisible(False)
             self.close_button.setVisible(True)
         else:
@@ -194,6 +198,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
 
         # disable the next button default on the list_page
         if page_name == 'list_page':
+            self.prev_button.setVisible(False)
             self.next_button.setEnabled(False)
             self.close_button.setVisible(False)
         else:
