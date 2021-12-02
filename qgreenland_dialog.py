@@ -125,6 +125,8 @@ class QGreenlandDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # get the path of the folder (empty if the setting is not there)
         self.saving_path = self.settings.value("qgreenland-plugin-saving_folder")
+        # create also the self.saving_folder
+        self.saving_folder = self.saving_path
         if self.saving_path:
             # set the text box with the path
             self.folder_path.setText(self.saving_path)
