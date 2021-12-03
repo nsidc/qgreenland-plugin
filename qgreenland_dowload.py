@@ -40,7 +40,10 @@ from qgis.core import (
     QgsApplication,
     Qgis,
     QgsNetworkAccessManager,
-    QgsSettings
+    QgsSettings,
+    QgsProject,
+    QgsVectorLayer,
+    QgsRasterLayer
 )
 
 from qgis.gui import (
@@ -107,7 +110,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
 
         self.list_model.itemChanged.connect(self.on_item_changed)
         self.list_model.itemChanged.connect(self.get_checked_items)
-
+        self.list_model_manage.itemChanged.connect(self.on_item_changed)
         # when the text changes connect to the filter function
         self.search_box.textChanged.connect(self.set_filter_string)
 
@@ -148,6 +151,8 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
             self.download_button.setEnabled(True)
         
         self.explore_files_button.clicked.connect(self.open_folder)
+
+        self.add_to_project_button.clicked.connect(self.load_layers)
 
     def get_server_url(self):
 
@@ -386,7 +391,14 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
         # file with the downloaded information of the files
         if os.path.exists(os.path.join(self.qgreenland_path, 'layers.json')):
             self.downloaded_layers = self.read_json(os.path.join(self.qgreenland_path, 'layers.json'))
-
+        else:
+            message_box = QMessageBox()
+            message_box.setText('No data have been downloaded yet!')
+            message_box.setIcon(QMessageBox.Critical)
+            message_box.exec()
+            self.stackedWidget.setCurrentIndex(0)
+            return
+        
         # loop into the hierarchies and fill the QTreeView with them
         for layer in self.downloaded_layers:
             layer_hierarchy = layer['hierarchy']
@@ -539,6 +551,24 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
 
         return checked_items
 
+    def get_checked_items_manage(self):
+        """
+        get a list of all the checked items
+        to get the unique id for each layer: item.data(Qt.UserRole)
+        """
+
+        # get a set to have unique and not repeated data that belongs to different categories
+        checked_items_manage = set()
+
+        # loop in the model and list all the items
+        for item in self.list_model_manage.findItems("", Qt.MatchContains | Qt.MatchRecursive):
+            # get only the checked items
+            if item.checkState() == Qt.Checked:
+                # add to the set the Qt.UserRole (AKA label) defined above
+                checked_items_manage.add(item.data(Qt.UserRole))
+
+        return checked_items_manage
+
 
     def write_json(self, item_list):
         """
@@ -601,12 +631,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
                 # and is not in the set
                 if layer['id'] == item and layer['id'] not in layers_in_json:
 
-                    # add to the dictionary the information needed
-                    # d['id'] = layer['id']
-                    # d['assets'] = layer['assets']
-                    # d['hierarchy'] = layer['hierarchy']
-                    # d['title'] = layer['title']
-
+                    # get the whole layer information into the dictonary for each layer
                     d = layer
 
                     # append to the list the dictionary for every item
@@ -748,11 +773,8 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
         for current, (parent, item) in enumerate(layer_to_download.items()):
 
             # set the downloading text
-            downloading_text = f"<strong>Downloading {parent}</strong>: {current + 1} of {len(layer_to_download)} layers"
+            downloading_text = f"<strong>Downloading {parent} layer</strong>: {current + 1} of {len(layer_to_download)} layers"
             self.download_label.setText(downloading_text)
-
-            # just for now
-            # downloading_url = 'http://localhost:8080/'
 
             # loop in all the assets of the layer and download them
             for asset in item:
@@ -825,3 +847,52 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
             os.startfile(folder_path)
         else:
             os.system(f"open {folder_path}")
+
+
+    def load_layers(self):
+        """
+        load the checked layers to QGIS
+        """
+
+        # list of raster files extension
+        raster_extension = ['.tif', '.tiff', '.jpeg', '.jpg', '.png']
+        # get the checked list of all the layers
+        items = self.get_checked_items_manage()
+
+        # get the folder path from the settings
+        folder_path = self.settings.value("/QGreenland/saving_folder")
+
+        # create the QgsProject instance
+        project = QgsProject.instance()
+
+        # initialize the empty list
+        layer_list = []
+
+        # loop into the downloaded layer (json file)
+        for layer in self.downloaded_layers:
+            # get only the match between the checked items and the layers
+            if layer['id'] in items:
+                # get the file path of the file
+                file_path =  os.path.join(folder_path, layer['id'], layer['assets'][0]['file'])
+                # get the extension of the file to correctly load vector or raster files
+                _, file_extension = os.path.splitext(file_path)
+                # vector layers
+                if file_extension not in raster_extension:
+                    vl = QgsVectorLayer(
+                        file_path,
+                        layer['id'],
+                        'ogr'
+                    )
+                    layer_list.append(vl)
+                # raster layers
+                else:
+                    rl = QgsRasterLayer(
+                        file_path,
+                        layer['id']
+                    )
+
+                    layer_list.append(rl)
+        
+        # load the layer list in the project
+        project.addMapLayers(layer_list)
+        
