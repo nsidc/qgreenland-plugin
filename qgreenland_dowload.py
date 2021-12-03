@@ -24,6 +24,7 @@
 
 import os
 import json
+import platform
 
 from qgis.PyQt import uic, QtWidgets
 from qgis.PyQt.QtWidgets import (
@@ -146,6 +147,8 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
             # also enable the download button
             self.download_button.setEnabled(True)
         
+        self.explore_files_button.clicked.connect(self.open_folder)
+
     def get_server_url(self):
 
         # create an instance of the QGreenlandServer class
@@ -808,3 +811,17 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
 
         # set the text box with the folder path chosen
         self.folder_path.setText(self.saving_folder)
+
+
+    def open_folder(self):
+        """
+        open the directory on external file browser
+
+        be aware that we should check the platform and use different methods
+        """
+
+        folder_path = self.settings.value("/QGreenland/saving_folder")
+        if platform.system() == 'Windows':
+            os.startfile(folder_path)
+        else:
+            os.system(f"open {folder_path}")
