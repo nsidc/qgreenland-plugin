@@ -175,6 +175,14 @@ class QGreenland:
             callback=self.run_download,
             parent=self.iface.mainWindow())
 
+        self.add_action(
+            icon_path,
+            text=self.tr(u'Manage Data'),
+            callback=self.run_manage_data,
+            add_to_toolbar=False,
+            parent=self.iface.mainWindow()
+            )
+
 
         # will be set False in run()
         self.first_start = True
@@ -215,3 +223,15 @@ class QGreenland:
 
         if result:
             pass
+
+    
+    def run_manage_data(self):
+
+        self.manage_dlg = QGreenlandDownload()
+        # call the method to fill the manage tree
+        self.manage_dlg._fill_manage_tree()
+        # set the tab to the correct index
+        self.manage_dlg.stackedWidget.setCurrentIndex(2)
+
+        self.manage_dlg.exec()
+
