@@ -424,7 +424,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
             # add the icons depending on the checksum
             # only if the json file in the profile folder exists
             try:
-                for static_layer in downloaded_layers:
+                for static_layer in self.downloaded_layers:
                     for i in static_layer['assets']:
                         # check if the layer of the manifest is in the static json file of the profile folder
                         if layer['id'] in static_layer['id']:
