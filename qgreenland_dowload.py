@@ -599,11 +599,10 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
                     for asset in layer['assets']:
                         files_to_download.append(asset['file'])
                         total_size+=asset['size_bytes']
-                        print(asset['size_bytes'])
                     layer_to_download[parent] = files_to_download
         
         # get the bytes in megabytes
-        total_size = total_size / 1000000
+        total_size = total_size / 1_000_000
 
         # just get the length of the list divided by 100
         total = 100 / len(layer_to_download)
@@ -612,7 +611,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
         for current, (parent, item) in enumerate(layer_to_download.items()):
 
             # set the downloading text
-            downloading_text = f"Downloading {parent} {current + 1} of {len(layer_to_download)} layers"
+            downloading_text = f"<strong>Downloading {parent}</strong>: {current + 1} of {len(layer_to_download)} layers"
             self.download_label.setText(downloading_text)
 
             # just for now
@@ -644,7 +643,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
             self.progressBar.setValue(int((current + 1) * total))
         
         # set the final progress bar text with the amount of megabytes downloaded
-        self.progressBar.setFormat(f"{total_size:,} MB have been downloaded")
+        self.progressBar.setFormat(f"{total_size:,.2f} MB have been downloaded")
         
 
     def browse_folder(self):
