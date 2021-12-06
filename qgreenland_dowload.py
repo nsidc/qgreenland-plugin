@@ -32,7 +32,12 @@ from qgis.PyQt.QtWidgets import (
     QMessageBox
 )
 from qgis.PyQt.QtCore import QSortFilterProxyModel, QUrl, QModelIndex
-from qgis.PyQt.QtGui import QIcon, QStandardItemModel, QStandardItem
+from qgis.PyQt.QtGui import (
+    QIcon,
+    QStandardItemModel,
+    QStandardItem,
+    QDesktopServices
+)
 from qgis.PyQt.Qt import Qt
 from qgis.PyQt.QtNetwork import QNetworkRequest
 
@@ -843,11 +848,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
         """
 
         folder_path = self.settings.value("/QGreenland/saving_folder")
-        if platform.system() == 'Windows':
-            os.startfile(folder_path)
-        else:
-            os.system(f"open {folder_path}")
-
+        QDesktopServices.openUrl(QUrl.fromLocalFile(folder_path))
 
     def load_layers(self):
         """
