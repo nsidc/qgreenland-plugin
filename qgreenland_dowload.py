@@ -454,7 +454,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
                                     child.setIcon(QIcon(os.path.join(os.path.dirname(__file__), 'icons','uptodate.png')))
                                     child.setToolTip(self.tr("You already have the most recent data downloaded"))
                                 # if the checksum is not the same - warn the user with the specified icon
-                                elif layer['assets'][0]['checksum'] != i['checksum']:
+                                else:
                                     child.setIcon(QIcon(os.path.join(os.path.dirname(__file__), 'icons','outdate.png')))
                                     child.setToolTip(self.tr("A more recent version of the file is available"))
             except:
