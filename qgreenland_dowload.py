@@ -24,7 +24,6 @@
 
 import os
 import json
-import platform
 
 from qgis.PyQt import uic, QtWidgets
 from qgis.PyQt.QtWidgets import (
