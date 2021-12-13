@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>QGreenlandDownload</class>
  <widget class="QDialog" name="QGreenlandDownload">
+  <property name="windowModality">
+   <enum>Qt::WindowModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -175,6 +178,57 @@
         <widget class="QProgressBar" name="progressBar">
          <property name="value">
           <number>0</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="manage_data">
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="1" column="0" colspan="4">
+        <widget class="QSplitter" name="splitter_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <widget class="QTreeView" name="treeView_manage">
+          <property name="headerHidden">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QTextBrowser" name="summary_text_manage"/>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="explore_files_button">
+         <property name="text">
+          <string>Explore Files</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QCheckBox" name="folder_structure_check">
+         <property name="text">
+          <string>Include Folder Structure</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QPushButton" name="add_to_project_button">
+         <property name="text">
+          <string>Add to Project</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="load_data_label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Please select layers on your computer to add to your project</string>
          </property>
         </widget>
        </item>
