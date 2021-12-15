@@ -175,8 +175,9 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
             # execute the QGreenlandServer dialog
             qgreenland_server.exec()
 
-            # get the chose url
+            # get the chosen url
             self.downloading_url = qgreenland_server.get_server()
+            self.close()
 
         else:
             # grab the url directly from the QgsSettings
