@@ -153,7 +153,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
             self.folder_path.setText(self.saving_path)
             # also enable the download button
             self.download_button.setEnabled(True)
-        
+
         self.explore_files_button.clicked.connect(self.open_folder)
 
         self.add_to_project_button.clicked.connect(self.load_layers)
@@ -164,7 +164,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
         qgreenland_server = QGreenlandServer()
 
         # if no server URL hae been chosen warnin the user and open the config
-        # settings 
+        # settings
         if not self.settings.value("/QGreenland/server-chosen"):
             # get an useful QMesasgeBox
             message_box = QMessageBox()
@@ -233,7 +233,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
             self.download_label.setText("")
         else:
             self.next_button.setEnabled(True)
-        
+
         if page_name == 'manage_data':
             self.prev_button.setVisible(True)
             self.next_button.setVisible(False)
@@ -403,7 +403,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
             message_box.exec()
             self.stackedWidget.setCurrentIndex(0)
             return
-        
+
         # loop into the hierarchies and fill the QTreeView with them
         for layer in self.downloaded_layers:
             layer_hierarchy = layer['hierarchy']
@@ -767,7 +767,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
                         files_to_download.append(asset['file'])
                         total_size+=asset['size_bytes']
                     layer_to_download[parent] = files_to_download
-        
+
         # get the bytes in megabytes
         total_size = total_size / 1_000_000
 
@@ -803,15 +803,15 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
                 # write the reply to a file
                 with open(saving_path, 'wb') as f:
                     f.write(reply_content)
-            
+
             self.progressBar.setValue(int((current + 1) * total))
-        
+
         # set the final progress bar text with the amount of megabytes downloaded
         self.progressBar.setFormat(f"{total_size:,.2f} MB have been downloaded")
 
         # fill the treeView with the json information
         self._fill_manage_tree()
-        
+
 
     def browse_folder(self):
         """
@@ -872,9 +872,15 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
         # loop into the downloaded layer (json file)
         for layer in self.downloaded_layers:
             # get only the match between the checked items and the layers
-            if layer['id'] in items:
+            if layer['id'] not in items:
+                continue
+
+            # find data assets only, not ancillary files and other types
+            spatial_data_assets = [asset for asset in layer['assets'] if asset['type'] == 'data']
+
+            for asset in spatial_data_assets:
                 # get the file path of the file
-                file_path =  os.path.join(folder_path, layer['id'], layer['assets'][0]['file'])
+                file_path =  os.path.join(folder_path, layer['id'], asset['file'])
                 # get the extension of the file to correctly load vector or raster files
                 _, file_extension = os.path.splitext(file_path)
                 # vector layers
@@ -893,7 +899,6 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
                     )
 
                     layer_list.append(rl)
-        
+
         # load the layer list in the project
         project.addMapLayers(layer_list)
-        
