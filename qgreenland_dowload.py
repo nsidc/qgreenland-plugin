@@ -406,7 +406,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
 
         # loop into the hierarchies and fill the QTreeView with them
         for layer in self.downloaded_layers:
-            layer_hierarchy = layer['hierarchy']
+            layer_hierarchy = layer['hierarchy'][:]
             parent_item = None
 
             while layer_hierarchy:
@@ -863,11 +863,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
         # get the folder path from the settings
         folder_path = self.settings.value("/QGreenland/saving_folder")
 
-        # create the QgsProject instance
-        project = QgsProject.instance()
-
-        # initialize the empty list
-        layer_list = []
+        respect_structure = self.folder_structure_check.isChecked()
 
         # loop into the downloaded layer (json file)
         for layer in self.downloaded_layers:
@@ -875,30 +871,47 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
             if layer['id'] not in items:
                 continue
 
+            layer_hierarchy = layer['hierarchy'][:]
+            parent_group = QgsProject.instance().layerTreeRoot()
+
+            while layer_hierarchy and respect_structure:
+                group_text = layer_hierarchy[0]
+                del layer_hierarchy[0]
+
+                # try to find existing layer tree group for this hierarchy level
+                child_group = parent_group.findGroup(group_text)
+
+                if not child_group:
+                    # need to create a group
+                    parent_group = parent_group.addGroup(group_text)
+                else:
+                    parent_group = child_group
+
             # find data assets only, not ancillary files and other types
             spatial_data_assets = [asset for asset in layer['assets'] if asset['type'] == 'data']
 
             for asset in spatial_data_assets:
                 # get the file path of the file
-                file_path =  os.path.join(folder_path, layer['id'], asset['file'])
+                file_path = os.path.join(folder_path, layer['id'], asset['file'])
                 # get the extension of the file to correctly load vector or raster files
                 _, file_extension = os.path.splitext(file_path)
+
+                map_layer = None
                 # vector layers
                 if file_extension not in raster_extension:
-                    vl = QgsVectorLayer(
+                    map_layer = QgsVectorLayer(
                         file_path,
                         layer['id'],
                         'ogr'
                     )
-                    layer_list.append(vl)
                 # raster layers
                 else:
-                    rl = QgsRasterLayer(
+                    map_layer = QgsRasterLayer(
                         file_path,
                         layer['id']
                     )
 
-                    layer_list.append(rl)
-
-        # load the layer list in the project
-        project.addMapLayers(layer_list)
+                # add to the project, without automatically creating a legend node for the layer...
+                QgsProject.instance().addMapLayer(map_layer, addToLegend=False)
+                # ...because we want to manually insert it into the correct parent group
+                parent_group.addLayer(map_layer)
