@@ -32,6 +32,8 @@ from .qgreenland_dowload import QGreenlandDownload
 from .qgreenland_server import QGreenlandServer
 import os.path
 
+import webbrowser
+
 
 class QGreenland:
     """QGIS Plugin Implementation."""
@@ -183,6 +185,14 @@ class QGreenland:
             parent=self.iface.mainWindow()
             )
 
+        self.add_action(
+            icon_path,
+            text=self.tr(u'Help'),
+            callback=self.run_help,
+            add_to_toolbar=False,
+            parent=self.iface.mainWindow()
+            )
+
 
         # will be set False in run()
         self.first_start = True
@@ -234,4 +244,10 @@ class QGreenland:
         self.manage_dlg.stackedWidget.setCurrentIndex(2)
 
         self.manage_dlg.exec()
+
+
+    def run_help(self):
+
+        help_url = 'https://qgreenland-plugin.readthedocs.io'
+        webbrowser.open(help_url)
 
