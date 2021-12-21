@@ -3,7 +3,7 @@
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
-name=QGreenland
+name=QGreenland Custom
 qgisMinimumVersion=3.16
 description=Download QGreenland dataset
 version=0.1
