@@ -299,16 +299,8 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
         if os.path.exists(os.path.join(self.qgreenland_path, 'layers.json')):
             downloaded_layers = self.read_json(os.path.join(self.qgreenland_path, 'layers.json'))
 
-        # temporary read the manifest local json file
-        # make it persistent as self.data
-        # json_file = os.path.join(os.path.dirname(__file__), 'manifest.json')
-        # with open(json_file, 'r') as f:
-        #     self.data = json.load(f)
-
         # load the manifest data from the remote url
         # make it persistent as self.data
-
-        # url = QUrl('http://localhost:8080/manifest.json')
         url = QUrl(self.downloading_url + 'manifest.json')
         network_request = QNetworkRequest(url)
         reply = QgsNetworkAccessManager.instance().blockingGet(network_request)
