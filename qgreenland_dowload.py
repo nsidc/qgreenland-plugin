@@ -508,7 +508,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
             for layer in self.downloaded_layers:
 
                 # get the correspondence between the clicked layer in the treeView and the title in the dictionary
-                if layer['id'] == item.text():
+                if layer['title'] == item.text():
                     # Format layer details, replacing newlines with html `<br>` elements.
                     layer_details = layer['layer_details'].replace('\n', '<br>')
 
