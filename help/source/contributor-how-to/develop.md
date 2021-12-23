@@ -1,6 +1,6 @@
 # How to develop QGreenland Custom
 
-## Development QGIS plugin install
+## Install the plugin to QGIS for development
 
 Install the plugin by symlinking this repository to your plugins directory,
 e.g.:
@@ -12,18 +12,23 @@ ln -s $PWD ~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/.
 Then in the QGIS "Manage and Install Plugins..." dialog's "Installed" tab,
 ensure the "QGreenland" plugin is enabled (checked).
 
-Use Plugin Reloader to reload the plugin after each change.
+
+## Development loop
+
+Before starting, instal the Plugin Reloader plugin. The development feedback
+loop looks like this:
+
+* Make code changes
+
+* Use Plugin Reloader to reload the plugin
+
+* Test
 
 
-## Edit docs
+## Automated testing
 
-To preview docs locally, create a local environment and install dependencies,
-then make the docs.
+If you want to write automated unit or regression tests, the
+`scripts/run-env-linux.sh` script should be used to run your tests in the QGIS
+environment without running QGIS itself.
 
-```
-cd help
-virtualenv env
-. env/bin/activate
-pip install -r requirements.txt
-make html
-```
+This should be handled by the Makefile target `make test`.
