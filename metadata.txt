@@ -6,7 +6,7 @@
 name=QGreenland Custom
 qgisMinimumVersion=3.16
 description=Download QGreenland dataset
-version=0.1
+version=0.1.0
 author=Matteo Ghetta (Faunalia)
 email=matteo.ghetta@faunalia.eu
 
