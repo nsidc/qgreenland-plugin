@@ -6,10 +6,10 @@ To preview docs locally, create a local Python environment and install
 dependencies, then make the docs.
 
 ```
-cd help
 virtualenv env
 . env/bin/activate
-pip install -r requirements.txt
+pip install -r dev-requirements.txt
+cd help
 make html
 ```
 

@@ -1,0 +1,15 @@
+###############################################################################
+# The runtime dependencies are limited to only the QGIS environment. These dev
+# dependencies only provide support for non-runtime behaviors, e.g.:
+# building docs locally, bumping versions, static analysis, etc.
+###############################################################################
+
+# Documentation:
+sphinx ~=4.3.2
+sphinx-rtd-theme ~=1.0.0
+myst-parser ~=0.15.2
+
+# Version management:
+bump2version ~=1.0.1
+
+# Static analysis: TODO

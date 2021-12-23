@@ -1,5 +1,28 @@
 # How to release a new version of QGreenland Custom
 
+## Increment the version
+
+Use `bumpversion` to bump the specified part of the version:
+
+```
+$ bumpversion --part={major|minor|patch}
+```
+
+Versions should be in one of the following forms:
+
+* `vX.Y.ZalphaN`: An alpha pre-release, e.g. `v1.2.3beta2`
+* `vX.Y.ZbetaN`: A beta pre-release, e.g. `v1.2.3alpha2`
+* `vX.Y.ZrcN`: A release candidate, e.g. `v1.2.3rc3`.
+* `vX.Y.Z`: A final release, e.g. `v1.2.3`.
+
+```{note}
+
+When using `bumpversion build`, ensure you've already used `bumpversion
+prerelease`. Running `bumpversion build` from a final release version number
+can result in an incorrect patch number, e.g. `v1.2.304`.
+```
+
+
 ## Build a package zip
 
 ```

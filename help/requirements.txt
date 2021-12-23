@@ -1,3 +1,6 @@
-sphinx ~=4.3.2
-sphinx-rtd-theme==1.0.0
+# Only for use by ReadTheDocs build system.
+# ReadTheDocs already includes:
+#  - sphinx
+#  - sphinx-rtd-theme
+
 myst-parser==0.15.2
