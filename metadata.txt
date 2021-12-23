@@ -3,7 +3,7 @@
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
-name=QGreenland
+name=QGreenland Custom
 qgisMinimumVersion=3.16
 description=Download QGreenland dataset
 version=0.1
@@ -12,8 +12,8 @@ email=matteo.ghetta@faunalia.eu
 
 about=Search and download QGreenland data into QGIS
 
-tracker=http://bugs
-repository=http://repo
+tracker=https://github.com/nsidc/qgreenland-plugin/issues
+repository=https://github.com/nsidc/qgreenland-plugin
 # End of mandatory metadata
 
 # Recommended items:
@@ -23,9 +23,9 @@ hasProcessingProvider=no
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=python
+tags=dataset, greenland, download, remote
 
-homepage=http://homepage
+homepage=https://github.com/nsidc/qgreenland-plugin#readme
 category=Web
 icon=qgreenland-icon.png
 # experimental flag
@@ -38,9 +38,6 @@ deprecated=False
 # (or upgraded) can be specified.
 # Check the documentation for more information.
 # plugin_dependencies=
-
-Category of the plugin: Raster, Vector, Database or Web
-# category=
 
 # If the plugin can run on QGIS Server.
 server=False
