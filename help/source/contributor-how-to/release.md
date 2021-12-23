@@ -23,10 +23,19 @@ can result in an incorrect patch number, e.g. `v1.2.304`.
 ```
 
 
-## Build a package zip
+## Tag the release with the new version
 
 ```
-make package VERSION=$ref  # Outputs a zip
+git tag {vX.Y.Z}
+```
+
+
+## Build a package zip
+
+Using the tag from the previous step, build a package:
+
+```
+make package VERSION={vX.Y.Z}  # Outputs a zip
 ```
 
 
