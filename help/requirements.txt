@@ -1,0 +1,6 @@
+# Only for use by ReadTheDocs build system.
+# ReadTheDocs already includes:
+#  - sphinx
+#  - sphinx-rtd-theme
+
+myst-parser==0.15.2
