@@ -15,7 +15,7 @@ Versions should be in one of the following forms:
 * `vX.Y.ZrcN`: A release candidate, e.g. `v1.2.3rc3`.
 * `vX.Y.Z`: A final release, e.g. `v1.2.3`.
 
-```{note}
+```{warning}
 
 When using `bumpversion build`, ensure you've already used `bumpversion
 prerelease`. Running `bumpversion build` from a final release version number
