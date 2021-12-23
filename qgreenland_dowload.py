@@ -425,7 +425,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
                     parent_item = self.list_model_manage.itemFromIndex(candidate_indices[0])
 
             # create the child (checkable)
-            child = QStandardItem(layer['id'])
+            child = QStandardItem(layer['title'])
             # set the custom data for the item as the unique id of each layer
             child.setData(layer['id'], Qt.UserRole)
             child.setFlags(Qt.ItemIsEnabled|Qt.ItemIsSelectable|Qt.ItemIsUserCheckable)
@@ -508,7 +508,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
             for layer in self.downloaded_layers:
 
                 # get the correspondence between the clicked layer in the treeView and the title in the dictionary
-                if layer['id'] == item.text():
+                if layer['title'] == item.text():
                     # Format layer details, replacing newlines with html `<br>` elements.
                     layer_details = layer['layer_details'].replace('\n', '<br>')
 
@@ -893,14 +893,14 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
                 if file_extension not in raster_extension:
                     map_layer = QgsVectorLayer(
                         file_path,
-                        layer['id'],
+                        layer['title'],
                         'ogr'
                     )
                 # raster layers
                 else:
                     map_layer = QgsRasterLayer(
                         file_path,
-                        layer['id']
+                        layer['title']
                     )
 
                 # add to the project, without automatically creating a legend node for the layer...
