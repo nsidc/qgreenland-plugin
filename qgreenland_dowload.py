@@ -127,6 +127,9 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
         # fill the treeView with the json information
         self._fill_tree()
 
+        # fill the treeView_manage also at the beginning
+        self._fill_manage_tree()
+
         # connect the Download button with the download_data method
         self.download_button.clicked.connect(self.download_data)
 
