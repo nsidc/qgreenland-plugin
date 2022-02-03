@@ -166,7 +166,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
         # create an instance of the QGreenlandServer class
         qgreenland_server = QGreenlandServer()
 
-        # if no server URL hae been chosen warnin the user and open the config
+        # if no server URL hae been chosen warning the user and open the config
         # settings
         if not self.settings.value("/QGreenland/server-chosen"):
             # get an useful QMesasgeBox
@@ -204,7 +204,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
 
     def on_page_changed(self):
         """
-        enable/disable set as visible/not visible the next button depening
+        enable/disable set as visible/not visible the next button depending
         on different conditions
         """
 
@@ -329,7 +329,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
                 if not candidate_indices:
                     new_parent_item = QStandardItem(parent_text)
                     new_parent_item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsUserCheckable)
-                    new_parent_item.setCheckState(Qt.Unchecked)  # first columun, checkable, checked=0
+                    new_parent_item.setCheckState(Qt.Unchecked)  # first column, checkable, checked=0
                     if parent_item:
                         parent_item.appendRow([new_parent_item])
                     else:
@@ -418,7 +418,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
                 if not candidate_indices:
                     new_parent_item = QStandardItem(parent_text)
                     new_parent_item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsUserCheckable)
-                    new_parent_item.setCheckState(Qt.Unchecked)  # first columun, checkable, checked=0
+                    new_parent_item.setCheckState(Qt.Unchecked)  # first column, checkable, checked=0
                     if parent_item:
                         parent_item.appendRow([new_parent_item])
                     else:
@@ -631,7 +631,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
                 # and is not in the set
                 if layer['id'] == item and layer['id'] not in layers_in_json:
 
-                    # get the whole layer information into the dictonary for each layer
+                    # get the whole layer information into the dictionary for each layer
                     d = layer
 
                     # append to the list the dictionary for every item
@@ -779,7 +779,7 @@ class QGreenlandDownload(QtWidgets.QDialog, FORM_CLASS):
             # loop in all the assets of the layer and download them
             for asset in item:
 
-                # get the downloading url from ther server item, the parent and finally the asset
+                # get the downloading url from the server item, the parent and finally the asset
                 downloading_url = self.downloading_url + parent + '/' + asset
 
                 # create a network request and the corresponding reply object
