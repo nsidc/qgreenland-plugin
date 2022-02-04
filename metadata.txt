@@ -10,7 +10,7 @@ qgisMinimumVersion=3.16
 description=Download QGreenland dataset
 version=0.1.0
 author=Matteo Ghetta (Faunalia)
-email=qgreenland@gmail.com
+email=qgreenland.info@gmail.com
 
 about=Search and download QGreenland data into QGIS
 
