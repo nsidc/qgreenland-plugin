@@ -1,6 +1,8 @@
 # This file contains metadata for your plugin.
 
-# This file should be included when you package your plugin.# Mandatory items:
+# This file should be included when you package your plugin.
+
+# Mandatory items:
 
 [general]
 name=QGreenland Custom
@@ -8,7 +10,7 @@ qgisMinimumVersion=3.16
 description=Download QGreenland dataset
 version=0.1.0
 author=Matteo Ghetta (Faunalia)
-email=matteo.ghetta@faunalia.eu
+email=qgreenland.info@gmail.com
 
 about=Search and download QGreenland data into QGIS
 
