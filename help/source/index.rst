@@ -21,6 +21,7 @@ QGreenland Custom
     :hidden:
 
     ./contributor-how-to/index
+    ./plugin-how-to.md
 
 
 
