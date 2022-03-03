@@ -5,7 +5,7 @@
 Use `bumpversion` to bump the specified part of the version:
 
 ```
-$ bumpversion --part={major|minor|patch}
+$ bumpversion part={major|minor|patch}
 ```
 
 Versions should be in one of the following forms:
