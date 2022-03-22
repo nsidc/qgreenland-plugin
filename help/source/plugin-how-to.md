@@ -10,6 +10,7 @@ in the top *Menu Bar**, and select **Manage and Install Plugins**.
 
 ![menu_bar](/_images/menu_bar.png)
 
+First, navigate to the **Settings** tab, and select the check box, **Show also experimental plugins**. Next,
 Navigate to the **All** tab in the plugin window, and search for QGreenland Custom. Click **Install plugin** and close. 
 
 ## Configuring QGreenland Custom
