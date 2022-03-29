@@ -31,7 +31,7 @@ homepage=https://github.com/nsidc/qgreenland-plugin#readme
 category=Web
 icon=qgreenland-icon.png
 # experimental flag
-experimental=False
+experimental=True
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
