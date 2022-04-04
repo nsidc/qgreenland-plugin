@@ -22,7 +22,7 @@ QGreenland Custom
 
     ./contributor-how-to/index
     ./plugin-how-to.md
-
+    ./arctic-dem-how-to.md
 
 
 .. only:: builder_html
