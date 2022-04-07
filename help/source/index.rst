@@ -21,8 +21,7 @@ QGreenland Custom
     :hidden:
 
     ./contributor-how-to/index
-    ./plugin-how-to.md
-    ./arctic-dem-how-to.md
+    ./user-how-to/index
 
 
 .. only:: builder_html
