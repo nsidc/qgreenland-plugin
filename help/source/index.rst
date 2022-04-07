@@ -15,14 +15,21 @@ QGreenland Custom
 
 
 .. toctree::
-    :name: How-to
-    :caption: How-to
+    :name: Contributor How-to
+    :caption: Contributor How-to
     :maxdepth: 1
     :hidden:
 
     ./contributor-how-to/index
-    ./plugin-how-to.md
-    ./arctic-dem-how-to.md
+
+
+.. toctree::
+    :name: User How-to
+    :caption: User How-to
+    :maxdepth: 1
+    :hidden:
+
+    ./user-how-to/index
 
 
 .. only:: builder_html
