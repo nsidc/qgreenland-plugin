@@ -2,6 +2,10 @@
 
 # QGreenland Custom
 
+> :warning: QGreenland Custom is no longer supported or maintained. This was an
+> experiment, and we decided to go in a different direction. It shouldn't be expected to
+> work.
+
 The QGreenland Plugin allows direct access to QGreenland layers without
 downloading the full QGreenland Package.
 
